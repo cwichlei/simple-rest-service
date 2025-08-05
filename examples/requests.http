@@ -1,0 +1,14 @@
+### Get all
+GET http://localhost:8080/texts
+
+### Get one
+GET http://localhost:8080/texts/1
+
+### Add new one
+POST http://localhost:8080/texts
+Content-Type: application/json
+
+new text
+
+### Delete existing one
+DELETE http://localhost:8080/texts/1
