@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,24 +32,28 @@ class ControllerIT {
     void testFindAll() {
         repo.saveAndFlush(new Entity("text"));
 
-        Collection<Entity> result = underTest.findAll();
+        ResponseEntity<Collection<Entity>> result = underTest.findAll();
 
-        assertThat(result).hasSize(2);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    void testFindById() throws Throwable {
+    void testFindById() {
         Entity first = repo.findAll().getFirst();
-        String result = underTest.findById(first.getId());
+        ResponseEntity<Entity> result = underTest.findById(first.getId());
 
-        assertThat(result).isEqualTo("test");
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotNull();
+        assertThat(result.getBody().getText()).isEqualTo("test");
     }
 
     @Test
     void testAdd() {
-        Entity result = underTest.add("text");
+        ResponseEntity<Entity> result = underTest.add(new Request("text"));
 
-        assertThat(result.getText()).isEqualTo("text");
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotNull();
+        assertThat(result.getBody().getText()).isEqualTo("text");
         assertThat(repo.findAll()).hasSize(2);
         assertThat(repo.findAll())
                 .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")

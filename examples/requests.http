@@ -2,13 +2,15 @@
 GET http://localhost:8080/texts
 
 ### Get one
-GET http://localhost:8080/texts/1
+GET http://localhost:8080/texts/2
 
 ### Add new one
 POST http://localhost:8080/texts
 Content-Type: application/json
 
-new text
+{
+  "text": "new text"
+}
 
 ### Delete existing one
 DELETE http://localhost:8080/texts/1

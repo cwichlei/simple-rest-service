@@ -4,14 +4,11 @@ import de.cwichlei.showcase.persistence.Entity;
 import de.cwichlei.showcase.persistence.Repo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 @RestController
 @RequestMapping("/texts")
@@ -22,35 +19,31 @@ public class Controller {
     private final Repo repo;
 
     @GetMapping(path = "/{id}")
-    public String findById(@PathVariable Long id) throws Throwable {
+    public ResponseEntity<Entity> findById(@PathVariable Long id) {
         Assert.notNull(id, "Id must be provided.");
 
         log.info("Finding text with id {}", id);
 
-        Optional<Entity> result = repo.findById(id);
-
-        return result
-                .orElseThrow((Supplier<Throwable>) () -> new ResponseStatusException(HttpStatus.NOT_FOUND))
-                .getText();
+        return ResponseEntity.of(repo.findById(id));
     }
 
     @GetMapping
-    public Collection<Entity> findAll() {
+    public ResponseEntity<Collection<Entity>> findAll() {
         log.info("Finding all texts");
 
-        return repo.findAll();
+        return ResponseEntity.ok().body(repo.findAll());
     }
 
     @PostMapping
-    public Entity add(@RequestBody String text) {
-        Assert.notNull(text, "Text must be provided.");
+    public ResponseEntity<Entity> add(@RequestBody Request request) {
+        Assert.notNull(request, "Text must be provided.");
 
-        log.info("Adding new text {}", text);
+        log.info("Adding new text {}", request);
 
-        Entity saved = repo.saveAndFlush(new Entity(text));
+        Entity saved = repo.saveAndFlush(new Entity(request));
 
         log.info("Saved {}", saved);
-        return saved;
+        return ResponseEntity.ok().body(saved);
     }
 
     @DeleteMapping("/{id}")

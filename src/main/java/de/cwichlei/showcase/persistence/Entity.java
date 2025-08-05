@@ -1,5 +1,6 @@
 package de.cwichlei.showcase.persistence;
 
+import de.cwichlei.showcase.rest.Request;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,5 +22,9 @@ public class Entity {
 
     public Entity(String text) {
         this.text = text;
+    }
+
+    public Entity(Request request){
+        this.text = request.getText();
     }
 }

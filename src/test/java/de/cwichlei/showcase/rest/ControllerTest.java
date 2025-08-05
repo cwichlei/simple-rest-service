@@ -9,15 +9,14 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -37,16 +36,21 @@ class ControllerTest {
     public ArgumentCaptor<Long> idArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 
     @Test
-    void testFindById() throws Throwable {
+    void testFindById() {
         when(repo.findById(1L)).thenReturn(Optional.of(new Entity("Hello World")));
 
-        assertThat(underTest.findById(1L)).isEqualTo("Hello World");
+        ResponseEntity<Entity> result = underTest.findById(1L);
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotNull();
+        assertThat(result.getBody().getText()).isEqualTo("Hello World");
     }
 
     @Test
     void testFindById_NotFound() {
-        ResponseStatusException thrown = assertThrows(ResponseStatusException.class, () -> underTest.findById(1L));
-        assertThat(thrown.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(404));
+        ResponseEntity<Entity> result = underTest.findById(1L);
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -54,20 +58,23 @@ class ControllerTest {
         List<Entity> all = List.of(new Entity("text 1"), new Entity("text 2"));
         when(repo.findAll()).thenReturn(all);
 
-        Collection<Entity> result = underTest.findAll();
+        ResponseEntity<Collection<Entity>> result = underTest.findAll();
 
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(2);
-        assertThat(result).containsAll(all);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotNull();
+        assertThat(result.getBody()).isNotNull();
+        assertThat(result.getBody()).containsAll(all);
     }
 
     @Test
     void testAdd() {
         when(repo.saveAndFlush(entityArgumentCaptor.capture())).thenReturn(new Entity("text"));
 
-        Entity result = underTest.add("text");
+        ResponseEntity<Entity> result = underTest.add(new Request("text"));
 
-        assertThat(result.getText()).isEqualTo("text");
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotNull();
+        assertThat(result.getBody().getText()).isEqualTo("text");
         assertThat(entityArgumentCaptor.getValue().getText()).isEqualTo("text");
     }
 
