@@ -4,11 +4,14 @@ import de.cwichlei.showcase.persistence.Entity;
 import de.cwichlei.showcase.persistence.Repo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @RestController
 @RequestMapping("/texts")
@@ -17,18 +20,18 @@ import java.util.Optional;
 public class Controller {
 
     private final Repo repo;
-    private static final Entity DEFAULT = new Entity();
 
     @GetMapping(path = "/{id}")
-    public String findById(@PathVariable Long id) {
+    public String findById(@PathVariable Long id) throws Throwable {
         Assert.notNull(id, "Id must be provided.");
 
         log.info("Finding text with id {}", id);
 
-        Optional<Entity> found = repo.findById(id);
-        Entity result = found.orElse(DEFAULT);
+        Optional<Entity> result = repo.findById(id);
 
-        return result.getText();
+        return result
+                .orElseThrow((Supplier<Throwable>) () -> new ResponseStatusException(HttpStatus.NOT_FOUND))
+                .getText();
     }
 
     @GetMapping
@@ -50,8 +53,8 @@ public class Controller {
         return saved;
     }
 
-    @DeleteMapping("/id")
-    public void delete(@PathVariable Long id){
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
         Assert.notNull(id, "Id must be provided.");
 
         log.info("Deleting text with id {}", id);

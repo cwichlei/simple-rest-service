@@ -9,12 +9,15 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -34,12 +37,16 @@ class ControllerTest {
     public ArgumentCaptor<Long> idArgumentCaptor = ArgumentCaptor.forClass(Long.class);
 
     @Test
-    void testFindById() {
+    void testFindById() throws Throwable {
         when(repo.findById(1L)).thenReturn(Optional.of(new Entity("Hello World")));
 
-        String result = underTest.findById(1L);
+        assertThat(underTest.findById(1L)).isEqualTo("Hello World");
+    }
 
-        assertThat(result).isEqualTo("Hello World");
+    @Test
+    void testFindById_NotFound() {
+        ResponseStatusException thrown = assertThrows(ResponseStatusException.class, () -> underTest.findById(1L));
+        assertThat(thrown.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(404));
     }
 
     @Test

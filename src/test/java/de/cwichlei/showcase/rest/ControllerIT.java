@@ -36,7 +36,7 @@ class ControllerIT {
     }
 
     @Test
-    void testFindById() {
+    void testFindById() throws Throwable {
         Entity first = repo.findAll().getFirst();
         String result = underTest.findById(first.getId());
 
