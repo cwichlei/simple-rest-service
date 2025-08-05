@@ -1,1 +1,1 @@
-Simple unsecured Rest Service, reading from and writing to a H2 repo
+Simple unsecured Rest Service with Spring Boot, reading from and writing to a H2 repo
